@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogIn</title>
+    <link rel="stylesheet"  href="../static/registration.css">
+</head>
+<body>
+    <div class="login_div">
+        <h1>Randstad Digital</h1>
+        <h1>LogIn Form</h1>
+        <form id="login_Form">
+            <div>
+                <label for="Email">Email:*</label>
+                <input type="email" id="Email" name="Email" required>
+            </div><br>
+            <div>
+                <label for="Password">Password:*</label>
+                <input type="password" id="Password" name="Password" required>
+            </div><br>
+            <div>
+                <label for="Re-Password">Re-Password:*</label>
+                <input type="password" id="Re-Password" name="Re-Password" required>
+            </div><br>
+        </form>
+        <a href='/api/forget_password'><h1>Forget Password</h1></a>
+        <a href='/api/register'><h1>Register Here</h1></a>
+
+        <button type="submit" onclick="LogIn_User()">Log In</button>
+    </div>
+    <script>
+        Email = document.getElementById("Email")
+        Password = document.getElementById("Password")
+        Re_Password = document.getElementById("Re-Password")
+
+        function reset(){
+            Email.value = "";
+            Password.value = "";
+            Re_Password.value = "";
+        } 
+
+        function LogIn_User() {
+            if (!Email.value){
+                alert("Please Enter the Email")
+                return
+            }
+            if (!Password.value){
+                alert("Please Enter the Password")
+                return
+            }
+            if (!Re_Password.value){
+                alert("Please Enter the Re-Password")
+                return
+            }
+            if (Password.value==Re_Password.value){
+                const user_data = {
+                    "email": Email.value,
+                    "password": Password.value
+                };
+                const requestData = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user_data)
+                };
+                fetch("/",requestData).
+                    then(response => {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        } 
+                        return response.json();
+                    })
+                    .then(data => {
+                        var token = data.token;
+                        sessionStorage.setItem('token', token);
+                        if (data.message) {
+                            alert('LogIn Successfully')
+                            fetch("/api/submit_estimation",{
+                                method:"GET",
+                                headers:{
+                                    'Authorization': data.token
+                                }
+                            }).then(response=>{
+                                console.log(response.json())
+                            })
+                        }else {
+                            alert(data.error)
+                            reset()
+                            return
+                        }
+                    })
+                    .catch(error => {
+                        // console.log(error)
+                        alert("error:"+error.message)
+                    });
+
+            } else {
+                alert("Password didn't match please Re-Enter the matching password")
+            }
+        }
+    </script>
+</body>
+</html>
