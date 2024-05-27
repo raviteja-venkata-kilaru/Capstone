@@ -1,24 +1,26 @@
 import pytest
-import requests
+from app import app
 
 BASE_URL = 'http://127.0.0.1:5010/api/forget_password'
 
 @pytest.fixture
-def register_url():
-    return BASE_URL
+def client():
+    """Create a test client for the Flask application."""
+    with app.test_client() as client:
+        yield client
 
-def test_forget_successful(register_url):
-    data = {'email': 'new_user@example.com'}
-    response = requests.post(register_url, json=data)
+def test_forget_successful(client):
+    data = {'email': 'new_user@example.com','password':'Raviteja@132'}
+    response = client.patch(BASE_URL, json=data)
     assert response.status_code == 200
-    assert response.json['message'] == 'Successfully Reseted the password'
+    assert 'Successfully Reseted the password' in response.json['message']
 
-def test_invalid_user(register_url):
-    data = {'email': 'new_user@example.com'}
-    response = requests.post(register_url, json=data)
-    assert response.json['error'] == 'Invalid email or password'
+def test_invalid_user(client):
+    data = {'email': 'new_user5@example.com'}
+    response = client.post(BASE_URL, json=data)
+    assert 'Invalid email or password' in response.json['error']
 
-def test_login_incomplete_user(register_url):
+def test_login_incomplete_user(client):
     data = {'email': ''}
-    response = requests.post(register_url, json=data)
-    assert response.json['error'] == 'Please enter email_id to reset'
+    response = client.post(BASE_URL, json=data)
+    assert 'Please enter email_id to reset' in response.json['error']

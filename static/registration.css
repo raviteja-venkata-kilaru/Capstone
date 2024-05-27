@@ -74,3 +74,11 @@ body, html {
   h1 {
     text-align: center;
   }
+  #logout {
+    width: 20%;
+    position: fixed;
+    top: 20px;
+    right: 0px;
+    left:1000px;
+    z-index: 9;
+}
