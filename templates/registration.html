@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet"  href="../static/registration.css">
+</head>
+<body>
+    
+    <div class="registration_div">
+        <h1>Randstad Digital</h1>
+        <h1>SignUp Form</h1>
+        <form id="registration_Form">
+            <div>
+                <label for="FirstName">FirstName:*</label>
+                <input type="text" id="FirstName" name="FirstName" required>
+            </div><br>
+            <div>
+                <label for="LastName">LastName:*</label>
+                <input type="text" id="LastName" name="LastName" required>
+            </div><br>
+            <div>
+                <label for="Email">Email:*</label>
+                <input type="email" id="Email" name="Email" required>
+            </div><br>
+            <div>
+                <label for="Password">Password:*</label>
+                <input type="password" id="Password" name="Password" required>
+            </div><br>
+            <div>
+                <label for="Re-Password">Re-Password:*</label>
+                <input type="password" id="Re-Password" name="Re-Password" required>
+            </div><br>
+        </form>
+        <button type="submit" onclick="register_User()">Register</button>
+
+        <a href='/'><h1>LogIn Here</h1></a>
+    </div>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <script>
+        FirstName = document.getElementById("FirstName")
+        LastName = document.getElementById("LastName")
+        Email = document.getElementById("Email")
+        Password = document.getElementById("Password")
+        Re_Password = document.getElementById("Re-Password")
+        function reset(){
+            FirstName.value = "";
+            LastName.value = "";
+            Email.value = "";
+            Password.value = "";
+            Re_Password.value = "";
+        } 
+        function register_User(){
+            if (Password.value.length < 7) {
+                alert("password length should be more then 8 charectors")
+            }else {
+                if (Password.value == Re_Password.value){
+                    const user_data = {
+                        "firstname": FirstName.value,
+                        "lastname": LastName.value,
+                        "email": Email.value,
+                        "password": Password.value
+                    };
+                    const requestData = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(user_data)
+                    };
+                    fetch("/api/register",requestData).
+                        then(response => {
+                            if (!response.ok) {
+                                throw new Error(response.statusText)
+                            } 
+                            return response.json()
+                        })
+                        .then(data =>{
+                            console.log(data)
+                            if (data.message) {
+                                alert('Registered Successfully')
+                                var anchor = document.createElement("a");
+                                anchor.href = "/";
+                                anchor.click();
+                            }else {
+                                alert(data.error)
+                                reset()
+                            }
+                            
+                        })
+                        .catch(error => {
+                            alert("error:",error)
+                        })
+                } else {
+                    alert("Password didn't match please Re-Enter the matching password")
+                }
+            }
+        }
+        
+    </script>
+    
+</body>
+</html>

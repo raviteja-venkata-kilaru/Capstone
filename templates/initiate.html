@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forget Password</title>
+    <link rel="stylesheet"  href="../static/registration.css">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <div class="forget_div">
+        <h1>Randstad Digital</h1>
+        <form id="forget_password_Form">
+            <div>
+                <label for="Password">Password:*</label>
+                <input type="password" id="Password" name="Password" required>
+            </div><br>
+        </form>
+        <button type="submit" onclick="forgetPassword()">Update Password</button>
+    </div>
+    <script>
+        function forgetPassword() {
+            Password = document.getElementById("Password")
+            var email = JSON.parse('{{ email | tojson | safe }}');
+            const user_data = {
+                    "email":email.email,
+                    "password": Password.value
+                };
+                const requestData = {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user_data)
+                };
+                fetch("/api/forget_password",requestData).
+                    then(response => {
+                        if (!response.ok) {
+                            throw new Error('Incorrect eamil');
+                        }
+                        return response.json();
+                    })
+                    .then(response => {
+                        var token = data.token;
+                        sessionStorage.setItem('token', token);
+                        alert("Password Changed successfully")
+                        fetch('/')   
+                    })
+        }
+        
+    </script>
+</body>
+</html>
