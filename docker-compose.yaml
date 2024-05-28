@@ -4,7 +4,7 @@ services:
   flask_app:
     build: ./flask_app
     port:
-      - "5010:5010"
+      - "5000:5000"
     environment:
       - MONGO_URI=mongodb://mongo:27017/Capstone
     depends_on:

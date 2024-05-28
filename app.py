@@ -23,21 +23,17 @@ estimationDatabase_crud = EstimationDatabase(Historical_Table)
 
 @app.route('/api/register',methods = ['POST','GET'])
 def register_user():
-    print("<><><><><><><><><><><><><><><><><><><><><><>")
     print(request)
     if request.method == 'POST':
-        user_data = request.json
-        print('<<<<<<<<<<<<<<<<<<<<<<<<<',user_data)
-        if not user_data['firstname'] and not user_data['lastname'] and not user_data['email'] and not user_data['password']:
+        user_data = request.json    
+        if not user_data['firstname'] or not user_data['lastname'] or not user_data['email'] or not user_data['password']:
             return jsonify({'error': 'Fill Every details please'})
         user = User_Table.find_one({'email':user_data['email']})
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>',user)
         if user:
             return jsonify({'error':'User Already There, Please LogIn'})
         user_data['password'] = bcrypt.generate_password_hash(user_data['password']).decode('utf-8')
-        print(user_data['password'])
+        user_data['token'] = ''
         result = User_Table.insert_one(user_data)
-        print(result.inserted_id)
         if result.inserted_id:
             return jsonify({'message':'User Registration Successful,Please LogIn'})
     return render_template('registration.html')
@@ -46,49 +42,53 @@ def register_user():
 def login_user():
     if request.method == 'POST':
         user_data = request.json
-        if  not user_data['email'] and not user_data['password']:
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        if  not user_data['email'] or not user_data['password']:
             return jsonify({'error': 'Please enter Email or Password'})
-        
         user = User_Table.find_one({'email': user_data['email']})
         if user and bcrypt.check_password_hash(user['password'], user_data['password']):
             token = jwt.encode({'username':user['firstname']+user['lastname']}, app.config['SECRET_KEY'], algorithm='HS256')
+            User_Table.update_one({'_id': user['_id']},{'$set': {'token':token}})
             return jsonify({'token': token,'message':'Successfully Login'}), 200
         else:
             return jsonify({'error': 'Invalid email or password'})
     else:
         return render_template('login.html')
 
+@app.route('/api/open_initiate')
+def open_initiate():
+    return render_template('initiate.html')
+
 @app.route('/api/forget_password',methods = ['GET','POST','PATCH'])
 def forget_user():
     if request.method == 'POST':
         user_data = request.json
         if  not user_data['email']:
-            return jsonify({'error': 'Please enter email_id to reset'})
+            return jsonify({'error': 'Please enter email_id to reset'}),400
         user = User_Table.find_one({'email': user_data['email']})
         if user:
-            result = send_email(user_data['email'])
+            # result = send_email(user_data['email'])
+            result = (True,user_data['email'])
             if result[0]:
-                email = {
-                    'eamil':result[1]
-                }
-                return render_template("initiate.html",email = email)
+                return jsonify({'email' : result[1]}),200
         else:
-            return jsonify({'error': 'Invalid email or password'})
+            return jsonify({'error': 'Invalid email or password'}),401
     elif request.method == 'PATCH':
         user_data = request.json
         user = User_Table.find_one({'email': user_data['email']})
         user_data['password'] = bcrypt.generate_password_hash(user_data['password']).decode('utf-8')
-        result = User_Table.insert_one(user_data)
-        if result.insert_id:
+        print(user_data)
+        result = User_Table.update_one({'_id':user['_id']},{'$set':{'password':user_data['password']}})
+        print(result)
+        if result.acknowledged:
             token = jwt.encode({'username':user['firstname']+user['lastname']}, app.config['SECRET_KEY'], algorithm='HS256')
+            User_Table.update_one({'_id':user['_id']},{'$set':{'token':token}})
             return jsonify({'token': token,'message':'Successfully Reseted the password'}), 200
         else:
-            return jsonify({'error': 'Not Able to Update the Password'})
+            return jsonify({'error': 'Not Able to Update the Password'}),401
     else:
         return render_template("forget_password.html") 
 
-@app.route('/api/submit_estimation', methods = ['GET','POST'])
+@app.route('/api/submit_estimation', methods = ['POST'])
 @token_required
 def submit_estimation():
     if request.method == 'POST':
@@ -96,10 +96,11 @@ def submit_estimation():
         print(estimation_data)
         historical_table = estimationDatabase_crud.create_estimation(estimation_data)
         return jsonify({'estimation_id': str(historical_table.inserted_id)}), 201
-    else:
-        return render_template("dashboard.html")
+        
     
-
+@app.route('/api/open_dashboard')
+def open_dashboard():
+    return render_template("dashboard.html")
 
 
 @app.route('/api/calculate_estimation', methods = ['GET','POST'])
@@ -119,20 +120,28 @@ def calculate_estimation():
         complexity = data['Complexity']
         size = data['Size']
         typeoftask = data['typeOfTask']
-        historical_data = Historical_Table.find({'complexity':complexity,'size':size,'type': typeoftask}) 
-        data1 = list(historical_data)
-        data_len = len(data1)
-        if not data_len:
-            return jsonify({'message':"There is no data in database please add Estimation and confidence"})
-        size_values = {"small":  4, "medium":  6, "large":  8}
-        cal_size=0
-        for i in data1:
-            for key,value in i.items():
-                if key == "size":
-                    cal_size += size_values[value]
-        data_cal = cal_size / data_len
-        return jsonify({'estimated_effort': data_cal,"confidence_level": confidence_level(data_cal)}), 200
+        historical_data = Historical_Table.find({'Complexity':complexity,'Size':str(size),'typeOfTask': typeoftask}) 
+        data_in_list = list(historical_data)
+        if not data_in_list:
+            return jsonify({'message':"Manually enter the Estimation and Confidence level"})
+        estimates = [data['estimated_hours'] if 'estimated_hours' in data.keys() else 0 for data in data_in_list]
+        if not estimates:
+            return jsonify({'estimated_effort':0,"confidence_level":"low","estimated_effort_range":'0-0'})
+        estimate_effort = sum(estimates)//len(estimates)
+        cal_size=sum([(estimate-estimate_effort)**2 for estimate in estimates])
+        var = cal_size/len(estimates)
+        s_d = var**0.5 # standerd_deviation
+        l_b = estimate_effort - s_d # lower_boundery
+        h_b = estimate_effort - s_d # higher_boundary
+        if s_d < 5: 
+            confidence = 'low'
+        elif s_d <10:
+            confidence = 'medium'
+        else:
+            confidence = 'high'
+        estimate_effort_range = f"{l_b}-{h_b}"
+        return jsonify({'estimated_effort': estimate_effort,"confidence_level": confidence,"estimate_effort_range":estimate_effort_range}), 200
 
 
 if "__main__" == __name__:
-    app.run(debug=True,port=5010)
+    app.run(debug=True,port=5000)

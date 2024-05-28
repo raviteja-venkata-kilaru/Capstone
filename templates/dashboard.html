@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DashBoard</title>
-    <link rel="stylesheet"  href="../static/registration.css">
+    <link rel="stylesheet"  href="../static/css/style.css">
 </head>
 <body>
     <div class="dashboard_div">
         <h1>Randstad Digital</h1>
         <h1>Estimation</h1>
-        <button type="submit" onclick="logout()">LogOut</button>
+        <button type="submit" id="logout" onclick="logout()">LogOut</button>
         <form id="dashboard_Form">
             <form>
                 <div>
@@ -54,148 +54,14 @@
             <input type="text" id="extimation_time" name="extimation_time" required><br>
             <label for="confidence_level">Confidence_level: </label>
             <input type="text" id="confidence_level" name="confidence_level" required>
+            <label for="extimation_range">Estimation Effort Range:</label>
+            <input type="text" id="extimation_range" name="extimation_range" required>
         </form>
         <button type="submit" onclick="submit_estimation()">Submit Estimation</button>
     </div>
     
 
-    <script>
-        Task = document.getElementById("Task")
-        Complexity = document.getElementById("Complexity")
-        Size = document.getElementById("Size")
-        typeOfTask = document.getElementById("typeOfTask")
-        Notes = document.getElementById("Notes")
-        Estimation = document.getElementById("extimation_time")
-        Confidence = document.getElementById("confidence_level")
-        const token = sessionStorage.getItem('token')
-        function logout(){
-            if (sessionStorage.getItem('token')){
-                sessionStorage.removeItem('token')
-                alert('Logout Successfully')
-            }
-            var anchor = document.createElement("a");
-            anchor.href = "/";
-            anchor.click();
-        }
-
-        Size.addEventListener('mouseenter', function (event) {
-            var inputValue = Task.value;
-            const regex = new RegExp(inputValue, 'i');
-            fetch('/api/calculate_estimation',{headers:{
-                    'Authorization': token
-                }}).
-            then(response=>{
-                return response.json()
-            })
-            .then(data=>{
-                if (data.history){
-                    var items = data.history
-                    for (let i = 0; i < items.length ; i++){
-                        if (regex.test(items[i]['Task'])) {
-                            if (items[i]['Size'] === '8'){
-                                Size.selectedIndex = 1;
-                            }
-                            if (items[i]['Size'] === '6'){
-                                Size.selectedIndex = 2;
-                            }
-                            if (items[i]['Size'] === '4'){
-                                Size.selectedIndex = 3;
-                            }
-                            if (items[i]['Complexity'] === Complexity.value){
-                                alert('Estimanted complexity is same with current complexity ')
-                            }else{
-                                alert('Estimated complexity is different from current complexity')
-                            }
-                        }
-                    }
-                }else{
-                    alert(data.message)
-                }
-            })
-        })
-
-        function reset(){
-            Task.value = "";
-            Complexity.selectedIndex = 0;
-            Size.selectedIndex = 0;
-            typeOfTask.selectedIndex = 0;
-            Notes.value = "";
-        } 
-        function Calculate_estimation() {
-            if (Task && Complexity && Size && typeOfTask){
-                const user_data = {
-                    "Complexity": Complexity.value,
-                    "Size": Size.value,
-                    "typeOfTask": typeOfTask.value,
-                };
-                const requestData = {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': token,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(user_data)
-                };
-                fetch("/api/calculate_estimation",requestData).
-                    then(response => {
-                        if (!response.ok) {
-                            throw new Error('Not Able to fetch the Data')
-                        } 
-                        return response.json()
-                    })
-                    .then(data =>{
-                        if(data.message || !(Estimation.value && Confidence.value)){
-                            alert(data.message)
-                            return
-                        }
-                        Estimation.value=data.estimated_effort || Estimation.value
-                        Confidence.value=data.confidence_level || Confidence.value
-                        
-
-                    })
-                    .catch(error=>{
-                        alert("Error")
-                    })
-
-            } else {
-                alert("Fields are empty")
-            }
-        }
-        function submit_estimation(){
-            const reqdata = {
-                "Task": Task.value,
-                "Complexity": Complexity.value,
-                "Size": Size.value,
-                "typeOfTask": typeOfTask.value,
-                "Note": Notes.value,
-                "Estimation":Estimation.value,
-                "Confidence":Confidence.value,
-            }
-            const requestbody = {
-                method: 'POST',
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reqdata)
-            };
-            fetch('/api/submit_estimation',requestbody).
-                then(response=>{
-                    if(!response.ok){
-                        throw new Error("Not Able to insert")
-                    }
-                    return response.json()
-                })
-                .then(data=>{
-                    alert("Data Stored Successfully")
-                    reset()
-                })
-                .catch(error=>{
-                    alert(error)
-                })
-        }
-        
-    </script>
+    <script src="../static/js/dashboard.js"></script>
     
 </body>
 </html>
