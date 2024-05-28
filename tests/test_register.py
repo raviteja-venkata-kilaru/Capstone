@@ -5,7 +5,6 @@ BASE_URL = 'http://127.0.0.1:5010/api/register'
 
 @pytest.fixture
 def client():
-    """Create a test client for the Flask application."""
     with app.test_client() as client:
         yield client
 

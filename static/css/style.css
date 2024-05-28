@@ -8,7 +8,7 @@ body, html {
     padding-left: 20px;
     width: 400px;
     padding-right: 20px;
-    padding-bottom: 70px;
+    padding-bottom: 0px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
@@ -33,6 +33,7 @@ body, html {
   }
   .dashboard_div {
     padding-left: 20px;
+    padding-top: 100px;
     width: 400px;
     padding-right: 20px;
     padding-bottom: 10px;
