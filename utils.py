@@ -60,22 +60,3 @@ class EstimationDatabase:
         estimation_data['timestamp'] = datetime.utcnow()
         result = self.collection.insert_one(estimation_data)
         return result
-
-    def read_estimation(self, estimation_id):
-        return self.collection.find_one({'_id': ObjectId(estimation_id)})
-
-    def update_estimation(self, estimation_id, new_data):
-        result = self.collection.update_one({'_id': ObjectId(estimation_id)}, {'$set': new_data})
-        return result.modified_count > 0
-
-    def delete_estimation(self, estimation_id):
-        result = self.collection.delete_one({'_id': ObjectId(estimation_id)})
-        return result.deleted_count > 0
-
-def confidence_level(data_cal):
-    if data_cal <=4:
-        return "low"
-    elif data_cal <=6:
-        return "medium"
-    elif data_cal <=8:
-        return "high"
