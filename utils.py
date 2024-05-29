@@ -11,7 +11,7 @@ from functools import wraps
 
 
 load_dotenv()
-
+# here i am reading values from .env file
 secret_key = os.getenv('SECRET_KEY')
 sender_email = os.getenv('sender_email')
 smtp_server = os.getenv('smtp_server')
@@ -20,6 +20,7 @@ smtp_username = os.getenv('smtp_username')
 smtp_password = os.getenv('smtp_password')
 
 def token_required(f):
+    '''This decorator is help to athenticate the user'''
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get('Authorization')
@@ -33,13 +34,13 @@ def token_required(f):
     return decorated
 
 def send_email(receiver_email):
+    '''Here we can send mails'''
     message_body = "This is a email sent from Estimation Tool to inform your account is varified and you can reset now"
     message = MIMEMultipart()
     message['From'] = sender_email
-    message['To'] = receiver_email
+    message['To'] = "ambika.srivastava@randstaddigital.com"
     message['Subject'] = 'Forget Password Mail'
     message.attach(MIMEText(message_body, 'plain'))
-
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
         server.login(smtp_username, smtp_password)
@@ -54,6 +55,7 @@ from datetime import datetime
 
 
 class EstimationDatabase:
+    '''In this class we are creating the data in collections'''
     def __init__(self, collection):
         self.collection = collection
     def create_estimation(self, estimation_data):

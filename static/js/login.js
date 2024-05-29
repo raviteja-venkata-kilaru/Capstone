@@ -9,6 +9,7 @@ function reset(){
 } 
 
 function LogIn_User() {
+    // this function is used to collect the data from login form and send the request to backend
     if (!Email.value){
         alert("Please Enter the Email")
         return
@@ -47,7 +48,7 @@ function LogIn_User() {
                 if (data.message) {
                     alert('LogIn Successfully')
                     var anchor = document.createElement("a");
-                    anchor.href = "/api/open_dashboard";
+                    anchor.href = "/api/open_dashboard?token=" + token;
                     anchor.click();
                 }else {
                     alert(data.error)

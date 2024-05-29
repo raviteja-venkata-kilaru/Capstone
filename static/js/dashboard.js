@@ -8,8 +8,10 @@ Confidence = document.getElementById("confidence_level")
 Estimation_range = document.getElementById("extimation_range")
 const token = sessionStorage.getItem('token')
 function logout(){
+    // this function is used to logout or remove the token which stored in Session Storage
     if (sessionStorage.getItem('token')){
         sessionStorage.removeItem('token')
+        sessionStorage.removeItem('email')
         alert('Logout Successfully')
     }
     var anchor = document.createElement("a");
@@ -18,8 +20,10 @@ function logout(){
 }
 
 Size.addEventListener('mouseenter', function (event) {
+    // this action will be used for when used add tha taks and complexity, then data of the size will automatically fetch
     var inputValue = Task.value;
     const regex = new RegExp(inputValue, 'i');
+    const token = sessionStorage.getItem('token')
     fetch('/api/calculate_estimation',{headers:{
         'Authorization': token
     }}).
@@ -63,6 +67,7 @@ Size.addEventListener('mouseenter', function (event) {
 })
 
 function reset(){
+    // this function is used to reset the values in Task form
     Task.value = "";
     Complexity.selectedIndex = 0;
     Size.selectedIndex = 0;
@@ -74,6 +79,7 @@ function reset(){
 } 
 function Calculate_estimation() {
     if (Task && Complexity && Size && typeOfTask){
+        const token = sessionStorage.getItem('token')
         const user_data = {
             "Complexity": Complexity.value,
             "Size": Size.value,
@@ -112,6 +118,7 @@ function Calculate_estimation() {
     }
 }
 function submit_estimation(){
+    const token = sessionStorage.getItem('token')
     const reqdata = {
         "Task": Task.value,
         "Complexity": Complexity.value,
@@ -140,9 +147,20 @@ function submit_estimation(){
     })
     .then(data=>{
         alert("Data Stored Successfully")
-        reset()
+        ListView()
     })
     .catch(error=>{
         alert(error)
     })
+}
+
+function ListView(){
+    const token= sessionStorage.getItem('token')
+    if (!token) {
+        console.log('Please Login')
+        return
+    }
+    var anchor = document.createElement("a");
+    anchor.href = "/api/listViewAll";
+    anchor.click();
 }

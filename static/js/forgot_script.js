@@ -1,5 +1,6 @@
 Email = document.getElementById("Email")
 function forgetPassword() {
+    // this function is used to collect the email form forget email form and send the request to backend
     const user_data = {
         "email": Email.value,
     };
@@ -24,12 +25,14 @@ function forgetPassword() {
             anchor.href = "/api/open_initiate";
             anchor.click();
         }).catch(error=>{
+            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
             alert(error)
         })
 }
         
 
 function changePassword() {
+    // this function is used to collect the new password and send to backend
     Password = document.getElementById("Password")
     console.log(sessionStorage.getItem('email'))
     const user_data = {

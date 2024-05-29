@@ -9,7 +9,7 @@ def client():
         yield client
 
 def test_register_successful(client):
-    data = {'firstname': 'Raviteja', 'lastname': 'kilaru', 'email': 'new_user2@example.com', 'password':'Raviteja@132'}
+    data = {'firstname': 'Raviteja', 'lastname': 'kilaru', 'email': 'new_user18@example.com', 'password':'Raviteja@132'}
     response = client.post(BASE_URL, json=data)       
     assert 'User Registration Successful' in response.json['message']
 

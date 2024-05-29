@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ListView</title>
+</head>
+<body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Task name</th>
+                <th>Complexity</th>
+                <th>Size</th>
+                <th>Type of Task</th>
+                <th>Note</th>
+                <th>Estimation</th>
+                <th>Confidence</th>
+                <th>Estimation Range</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%for eachrow in viewList%}
+                
+                <tr id="roweach">
+                    <td>{{eachrow['Task']}}</td>
+                
+                    <td>{{eachrow['Complexity']}}</td>
+                
+                    <td>{{eachrow['Size']}}</td>
+                
+                    <td>{{eachrow['typeOfTask']}}</td>
+                
+                    <td>{{eachrow['Notes']}}</td>
+                
+                    <td>{{eachrow['Estimation']}}</td>
+                
+                    <td>{{eachrow['Confidence']}}</td>
+                
+                    <td>{{eachrow['Estimation_range']}}</td>
+                    <td><button type="button" onclick="Edit('{{eachrow['_id']}}')">Edit</button>/<button type="button" id="Delete" onclick="Delete('{{ eachrow['_id'] }}')">Delete</button> </td>
+                </tr>
+                
+            {%endfor%}
+        </tbody>
+    </table>
+    <script src="../static/js/listView.js"></script>
+</body>
+</html>

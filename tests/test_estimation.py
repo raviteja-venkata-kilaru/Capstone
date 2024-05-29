@@ -24,7 +24,8 @@ def test_calculate_estimation_no_data_details(client):
     assert 'Manually enter the Estimation and Confidence level' in response.json['message']
 
 def test_calculate_estimation_successful(client):
-    data = {'Complexity':'High','Size':"8",'typeOfTask': 'Developing'}
+    data = {'Complexity':'High','Size':"8",'typeOfTask': 'Integration'}
     response = client.post(BASE_URL, json=data)
+    print(response.json)
     assert response.json['estimated_effort'] > 0
     assert response.json['confidence_level'] in ['high','medium','low']

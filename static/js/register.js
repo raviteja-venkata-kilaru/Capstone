@@ -5,12 +5,12 @@ Password = document.getElementById("Password")
 Re_Password = document.getElementById("Re-Password")
 function reset(){
     FirstName.value = "";
-    LastName.value = "";
     Email.value = "";
     Password.value = "";
     Re_Password.value = "";
 } 
 function register_User(){
+    // this function is used for collect the data from register form and send to backend
     if (Password.value.length < 7) {
         alert("password length should be more then 8 charectors")
     }else {
